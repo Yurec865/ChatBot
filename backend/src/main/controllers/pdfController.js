@@ -28,22 +28,22 @@ const extractTextFromPDF = async (filePath) => {
 export const uploadPDF = async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ error: "Файл не завантажено" });
+      return res.status(400).json({ error: "File not uploaded" });
     }
 
-    console.log("Файл, переданий multer:", req.file);
+    console.log("File received by multer:", req.file);
     const filePath = path.resolve(req.file.path);
-    console.log("Файл збережено за шляхом:", filePath);
+    console.log("File saved at path:", filePath);
 
     if (!fs.existsSync(filePath)) {
-      console.error("Файл не знайдено:", filePath);
-      return res.status(400).json({ error: "Файл не знайдено" });
+      console.error("File not found:", filePath);
+      return res.status(400).json({ error: "File not found" });
     }
 
     const pdfText = await extractTextFromPDF(filePath);
 
     if (!pdfText) {
-      return res.status(400).json({ error: "Файл не містить тексту" });
+      return res.status(400).json({ error: "File contains no text" });
     }
 
     const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 500, chunkOverlap: 50 });
@@ -52,8 +52,6 @@ export const uploadPDF = async (req, res) => {
     const embeddings = new OpenAIEmbeddings({ openAIApiKey: process.env.OPENAI_API_KEY });
     const embeddedChunks = await embeddings.embedDocuments(chunks);
 
-    // await collection.delete();
-
     await collection.add({
       ids: chunks.map((_, i) => `pdf_${Date.now()}_${i}`),
       embeddings: embeddedChunks,
@@ -61,9 +59,9 @@ export const uploadPDF = async (req, res) => {
     });
 
     fs.unlinkSync(filePath);
-    res.json({ message: "📄 Текст з PDF додано до бази знань" });
+    res.json({ message: "📄 Text from PDF added to knowledge base" });
   } catch (error) {
-    console.error("Помилка під час обробки PDF:", error);
-    res.status(500).json({ error: "Помилка під час збереження тексту PDF" });
+    console.error("Error processing PDF:", error);
+    res.status(500).json({ error: "Error saving PDF text" });
   }
 };

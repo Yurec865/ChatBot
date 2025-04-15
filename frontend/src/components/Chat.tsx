@@ -64,7 +64,7 @@ export default function ChatPage() {
       if (data.message) {
         setMessages((prev) => [
           ...prev,
-          { id: Date.now(), text: "📄 PDF успішно завантажено. Інформація тепер доступна!", sender: "bot" },
+          { id: Date.now(), text: "📄 PDF uploaded successfully. Information is now available!", sender: "bot" },
         ]);
       } else {
         console.error("No success message in response:", data);
@@ -87,6 +87,24 @@ export default function ChatPage() {
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
       sendMessage();
+    }
+  };
+
+  const clearChat = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:5000/api/chat/clear", {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (data.message) {
+        setMessages([{ id: 1, text: "Hello! How can I help you?", sender: "bot" }]);
+        setFile(null);
+      }
+    } catch (error) {
+      console.error("Error clearing chat:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -130,6 +148,14 @@ export default function ChatPage() {
           disabled={loading}
         >
           Send
+        </button>
+        <button
+          className="ml-4 bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600 transition"
+          onClick={clearChat}
+          disabled={loading}
+          title="Clear chat history"
+        >
+          Clear Chat
         </button>
       </div>
     </div>

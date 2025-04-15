@@ -19,17 +19,6 @@ export const chatWithAI = async (req, res) => {
 
     const relevantContext = searchResults.documents?.flat().join("\n") || "Context not found.";
 
-    // const relevantContext = searchResults.documents?.map((doc, i) => {
-    //   const meta = searchResults.metadatas?.[i];
-    //   return `📄 Джерело: ${meta?.source}, сторінка ${meta?.page}\n${doc}`;
-    // }).join("\n---\n") || "Контекст не знайдено.";    
-
-    // const llm = new ChatOpenAI({
-    //   openAIApiKey: process.env.OPENAI_API_KEY,
-    //   temperature: 0.5,
-    //   modelName: "gpt-3.5-turbo",
-    // });
-
     const llm = new ChatOpenAI({
       openAIApiKey: process.env.OPENAI_API_KEY,
       temperature: 0.7,
@@ -63,6 +52,18 @@ export const chatWithAI = async (req, res) => {
     res.json({ response: responseText });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Помилка під час роботи з OpenAI" });
+    res.status(500).json({ error: "Error occurred while working with OpenAI" });
+  }
+};
+
+export const clearChatContext = async (req, res) => {
+  try {
+    await chromaClient.deleteCollection({ name: "chat_history" });
+    // Recreate the collection after deletion
+    await chromaClient.getOrCreateCollection({ name: "chat_history" });
+    res.json({ message: "Chat context cleared successfully." });
+  } catch (error) {
+    console.error("Error clearing chat context:", error);
+    res.status(500).json({ error: "Failed to clear chat context." });
   }
 };
