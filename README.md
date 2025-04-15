@@ -1,3 +1,7 @@
+## 🚧 Project Status
+
+This project is currently under active development. I'm continuously working on improvements and new features.
+
 AI-Powered PDF Q&A Chatbot
 This project is an intelligent chatbot that answers questions based on the content of uploaded PDF files.
 
